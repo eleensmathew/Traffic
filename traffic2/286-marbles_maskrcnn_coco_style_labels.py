@@ -52,6 +52,7 @@ class CocoLikeDataset(utils.Dataset):
         
         # Add the class names using the base method from utils.Dataset
         source_name = "coco_like"
+        print(coco_json['categories'])
         for category in coco_json['categories']:
             class_id = category['id']
             class_name = category['name']
@@ -120,21 +121,21 @@ class CocoLikeDataset(utils.Dataset):
             mask_draw = ImageDraw.ImageDraw(mask, '1')
 
             print(f"Annotation: {annotation}")
-            print(f"Segmentation data: {annotation['segmentation']}")
-            if annotation['segmentation']:
-                for segmentation in annotation['segmentation']:
-                    mask_draw.polygon(segmentation, outline=1, fill=0)
-                    bool_array = np.array(mask) > 0
-                    instance_masks.append(bool_array)
-                    class_ids.append(class_id)
-            else:
-                # Use bbox to create a rectangular mask
-                bbox = annotation['bbox']
-                x, y, width, height = bbox
-                mask_draw.rectangle([x, y, x + width, y + height], outline=1, fill=0)
-                bool_array = np.array(mask) > 0
-                instance_masks.append(bool_array)
-                class_ids.append(class_id)
+            #print(f"Segmentation data: {annotation['segmentation']}")
+            # if annotation['segmentation']: #change to segmentation
+            #     for segmentation in annotation['segmentation']:
+            #         mask_draw.polygon(segmentation, outline=1, fill=0)
+            #         bool_array = np.array(mask) > 0
+            #         instance_masks.append(bool_array)
+            #         class_ids.append(class_id)
+            # else:
+            #     # Use bbox to create a rectangular mask
+            bbox = annotation['bbox']
+            x, y, width, height = bbox
+            mask_draw.rectangle([x, y, x + width, y + height], outline=1, fill=0)
+            bool_array = np.array(mask) > 0
+            instance_masks.append(bool_array)
+            class_ids.append(class_id)
         
         print("length of arr instance_masks, annotations:", len(instance_masks) , len(annotations))
         mask = np.dstack(instance_masks)
@@ -145,43 +146,43 @@ class CocoLikeDataset(utils.Dataset):
 ##############################
 
 dataset_train = CocoLikeDataset()
-dataset_train.load_data('/home/eleensmathew/traffic2/person on bike.v1i.coco/train/_annotations.coco.json', '/home/eleensmathew/traffic2/person on bike.v1i.coco/train')
+dataset_train.load_data('traffic2/person on bike.v7i.coco/train/_annotations.coco.json', 'traffic2/person on bike.v7i.coco/train')
 dataset_train.prepare()
 
 #validation data
 dataset_val = CocoLikeDataset()
-dataset_val.load_data('/home/eleensmathew/traffic2/person on bike.v1i.coco/valid/_annotations.coco.json', '/home/eleensmathew/traffic2/person on bike.v1i.coco/valid')
+dataset_val.load_data('traffic2/person on bike.v7i.coco/valid/_annotations.coco.json', 'traffic2/person on bike.v7i.coco/valid')
 dataset_val.prepare()
 
 dataset_test = CocoLikeDataset()
-dataset_test.load_data('/home/eleensmathew/traffic2/person on bike.v1i.coco/fake_test/_annotations.coco.json', '/home/eleensmathew/traffic2/person on bike.v1i.coco/fake_test')
+dataset_test.load_data('traffic2/person on bike.v7i.coco/test/_annotations.coco.json', 'traffic2/person on bike.v7i.coco/test')
 dataset_test.prepare()
 
 
-dataset = dataset_train
-image_ids = dataset.image_ids
-#image_ids = np.random.choice(dataset.image_ids, 3)
-for image_id in image_ids:
-    if image_id == 0:
-        continue
-    image = dataset.load_image(image_id)
-    mask, class_ids = dataset.load_mask(image_id)
-    display_top_masks(image, mask, class_ids, dataset.class_names, limit=2)  #limit to total number of classes
+#dataset = dataset_train
+# image_ids = dataset.image_ids
+# #image_ids = np.random.choice(dataset.image_ids, 3)
+# for image_id in image_ids:
+#     if image_id == 0:
+#         continue
+#     image = dataset.load_image(image_id)
+#     mask, class_ids = dataset.load_mask(image_id)
+#     display_top_masks(image, mask, class_ids, dataset.class_names, limit=2)  #limit to total number of classes
 
 
 
-# define image id
-image_id = 1
-# load the image
-image = dataset_train.load_image(image_id)
-# load the masks and the class ids
-mask, class_ids = dataset_train.load_mask(image_id)
+# # define image id
+# image_id = 1
+# # load the image
+# image = dataset_train.load_image(image_id)
+# # load the masks and the class ids
+# mask, class_ids = dataset_train.load_mask(image_id)
 
-# display_instances(image, r1['rois'], r1['masks'], r1['class_ids'],
-# dataset.class_names, r1['scores'], ax=ax, title="Predictions1")
+# # display_instances(image, r1['rois'], r1['masks'], r1['class_ids'],
+# # dataset.class_names, r1['scores'], ax=ax, title="Predictions1")
 
-# extract bounding boxes from the masks
-bbox = extract_bboxes(mask)
+# # extract bounding boxes from the masks
+# bbox = extract_bboxes(mask)
 # display image with masks and bounding boxes
 #display_instances(image, bbox, mask, class_ids, dataset_train.class_names)
 
@@ -191,7 +192,7 @@ class MarbleConfig(Config):
 	# define the name of the configuration
 	NAME = "marble_cfg_coco"
 	# number of classes (background + blue marble + non-Blue marble)
-	NUM_CLASSES = 1 + 2
+	NUM_CLASSES = 1 + 5
 	# number of training steps per epoch
 	STEPS_PER_EPOCH = 100
     #DETECTION_MIN_CONFIDENCE = 0.9 # Skip detections with < 90% confidence
@@ -208,7 +209,7 @@ sys.path.append(ROOT_DIR)  # To find local version of the library
 # Directory to save logs and trained model
 DEFAULT_LOGS_DIR = os.path.join(ROOT_DIR, "logs")
 # Path to trained weights file
-COCO_WEIGHTS_PATH = os.path.join(ROOT_DIR, "coco_weights/mask_rcnn_coco.h5")
+COCO_WEIGHTS_PATH = os.path.join(ROOT_DIR, "traffic2/coco_weights/mask_rcnn_coco.h5")
 
 ########################
 #Weights are saved to root D: directory. need to investigate how they can be
@@ -225,9 +226,9 @@ model.train(dataset_train, dataset_train, learning_rate=config.LEARNING_RATE, ep
 
 
 ###################################################
-from mrcnn.model import load_image_gt
-from mrcnn.model import mold_image
-from mrcnn.utils import compute_ap
+from maskrcnn.mrcnn.model import load_image_gt
+from maskrcnn.mrcnn.model import mold_image
+from maskrcnn.mrcnn.utils import compute_ap
 from numpy import expand_dims
 from numpy import mean
 from matplotlib.patches import Rectangle
@@ -238,32 +239,35 @@ class PredictionConfig(Config):
 	# define the name of the configuration
 	NAME = "marble_cfg_coco"
 	# number of classes (background + Blue Marbles + Non Blue marbles)
-	NUM_CLASSES = 1 + 1
+	NUM_CLASSES = 1 + 5
 	# Set batch size to 1 since we'll be running inference on
             # one image at a time. Batch size = GPU_COUNT * IMAGES_PER_GPU
 	GPU_COUNT = 1
-	IMAGES_PER_GPU = 1
+	IMAGES_PER_GPU = 2
  
 # calculate the mAP for a model on a given dataset
 def evaluate_model(dataset, model, cfg):
 	APs = list()
+	scores = []
 	for image_id in dataset.image_ids:
 		# load image, bounding boxes and masks for the image id
-		image, image_meta, gt_class_id, gt_bbox, gt_mask = load_image_gt(dataset, cfg, image_id, use_mini_mask=False)
-		# convert pixel values (e.g. center)
-		scaled_image = mold_image(image, cfg)
-		# convert image into one sample
-		sample = expand_dims(scaled_image, 0)
+		image, image_meta, gt_class_id, gt_bbox, gt_mask = load_image_gt(dataset, cfg, image_id)
+
 		# make prediction
-		yhat = model.detect(sample, verbose=0)
+		results = model.detect([image], verbose=0)
 		# extract results for first sample
-		r = yhat[0]
+		r = results[0]
 		# calculate statistics, including AP
-		AP, _, _, _ = compute_ap(gt_bbox, gt_class_id, gt_mask, r["rois"], r["class_ids"], r["scores"], r['masks'])
-		# store
-		APs.append(AP)
+		print(f"Image ID: {image_id}")
+		print(f"Ground Truth - Class IDs: {gt_class_id}, BBoxes: {gt_bbox}")
+		print(f"Predictions - ROIs: {r['rois']}, Class IDs: {r['class_ids']}, Scores: {r['scores']}")
+		AP, precisions, recalls, overlaps = compute_ap(gt_bbox, gt_class_id, gt_mask, r["rois"], r["class_ids"], r["scores"], r['masks'])
+		print(f"AP: {AP}, Precisions: {precisions}, Recalls: {recalls}, Overlaps: {overlaps}")
+		#APs.append(AP)
+		scores.extend(r['scores'])
 	# calculate the mean AP across all images
-	mAP = mean(APs)
+	#mAP = mean(APs)
+	mAP = np.mean(scores) if scores else 0
 	return mAP
  
 
@@ -272,24 +276,25 @@ cfg = PredictionConfig()
 # define the model
 model = MaskRCNN(mode='inference', model_dir='logs', config=cfg)
 # load model weights
-model.load_weights('logs/mask_rcnn_marble_cfg_coco_0003.h5', by_name=True)
-# evaluate model on training dataset
-train_mAP = evaluate_model(dataset_train, model, cfg)
-print("Train mAP: %.3f" % train_mAP)
-# evaluate model on test dataset
-test_mAP = evaluate_model(dataset_test, model, cfg)
-print("Test mAP: %.3f" % test_mAP)
+model.load_weights('/home/eleensmathew/Traffic/mask_rcnn_helmet.h5', by_name=True)
+#evaluate model on training dataset
+# train_mAP = evaluate_model(dataset_train, model, cfg)
+# print("Train mAP: %.3f" % train_mAP)
+# #evaluate model on test dataset
+# test_mAP = evaluate_model(dataset_test, model, cfg)
+# print("Test mAP: %.3f" % test_mAP)
 
 #################################################
 #Test on a single image
-marbles_img = skimage.io.imread("/home/eleensmathew/traffic2/person on bike.v1i.coco/test/asia-vietnam-hanoi-traffic-traffic-jam-traffic-congestion-motorbikes-C8GFWR__flip_jpg.rf.84f7abf8607affb0ef20fcb8bf34e0b8.jpg")
-plt.imshow(marbles_img)
 
-detected = model.detect([marbles_img])
-results = detected[0]
-class_names = ['BG', 'person_bike']
-display_instances(marbles_img, results['rois'], results['masks'], 
-                  results['class_ids'], class_names, results['scores'])
+# marbles_img = skimage.io.imread("/home/eleensmathew/Traffic/traffic2/person on bike.v1i.coco/train/4_jpg.rf.b13755eb2bc2c60cb21e6c077b743425.jpg")
+# plt.imshow(marbles_img)
+
+# detected = model.detect([marbles_img])
+# results = detected[0]
+# class_names = ['helmet', 'person', 'BG']
+# display_instances(marbles_img, results['rois'], results['masks'], 
+#                   results['class_ids'], class_names, results['scores'])
 
 ###############################
 
@@ -352,21 +357,31 @@ def detect_and_color_splash(model, image_path=None, video_path=None):
             print("frame: ", count)
             # Read next image
             success, img = vcapture.read()
+            print("success", success)
             if success:
                 # OpenCV returns images as BGR, convert to RGB
                 img = img[..., ::-1]
                 # Detect objects
                 r = model.detect([img], verbose=0)[0]
+                
                 # Color splash
                 splash = color_splash(img, r['masks'])
                 # RGB -> BGR to save image to video
                 splash = splash[..., ::-1]
                 # Add image to video writer
+                file_name = "splash_{:%Y%m%dT%H%M%S}.png".format(datetime.datetime.now())
+                skimage.io.imsave(file_name, splash)
+                marbles_img = skimage.io.imread(file_name)
+                plt.imshow(marbles_img)
+                class_names = ['helmet', 'person', 'BG']
+                display_instances(marbles_img, r['rois'], r['masks'], 
+                                r['class_ids'], class_names, r['scores'])
+
                 vwriter.write(splash)
                 count += 1
         vwriter.release()
     print("Saved to ", file_name)
 
-detect_and_color_splash(model, image_path="/home/eleensmathew/traffic2/person on bike.v1i.coco/test/1__flip_jpg.rf.8b3460a95f101cf23ec0bc8e50e89f9e.jpg")
+#detect_and_color_splash(model, image_path="/home/eleensmathew/Traffic/traffic2/person on bike.v1i.coco/test/48_jpg.rf.ad5ed83bdcdd41a3e90b9fab6c4cc3a9.jpg")
 
-                         
+detect_and_color_splash(model, video_path="/home/eleensmathew/Traffic/videos/video4.mp4")
